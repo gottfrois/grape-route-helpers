@@ -2,7 +2,7 @@ module GrapeRouteHelpers
   # wrapper around Grape::Route that adds a helper method
   class DecoratedRoute
     attr_reader :route, :helper_names, :helper_arguments,
-                :extension, :route_options
+                :extension
 
     def self.sanitize_method_name(string)
       string.gsub(/\W|^[0-9]/, '_')
@@ -10,7 +10,6 @@ module GrapeRouteHelpers
 
     def initialize(route)
       @route = route
-      @route_options = route.instance_variable_get(:@options)
       @helper_names = []
       @helper_arguments = required_helper_segments
       @extension = default_extension
@@ -90,7 +89,7 @@ module GrapeRouteHelpers
 
     def segment_to_value(segment, opts = {})
       options = HashWithIndifferentAccess.new(
-        route_options.merge(opts)
+        route.options.merge(opts)
       )
 
       if dynamic_segment?(segment)
@@ -124,7 +123,7 @@ module GrapeRouteHelpers
 
     def required_helper_segments
       segments_in_options = dynamic_path_segments.select do |segment|
-        route_options[segment.to_sym]
+        route.options[segment.to_sym]
       end
       dynamic_path_segments - segments_in_options
     end
@@ -144,19 +143,19 @@ module GrapeRouteHelpers
     end
 
     def route_path
-      route_options[:path]
+      route.path
     end
 
     def route_version
-      route_options[:version]
+      route.version
     end
 
     def route_namespace
-      route_options[:namespace]
+      route.namespace
     end
 
     def route_method
-      route_options[:method]
+      route.request_method
     end
   end
 end
